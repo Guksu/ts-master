@@ -9,8 +9,10 @@
     // 추론되지 않는 타입은 오류로 처리할지 설정 가능하다.
     "strict": true,
     // 자동으로 모든 ts파일을 개별 모듈로 설정할 수 있다.
-    "moduleDetection": "force"
+    "moduleDetection": "force",
+    "allowJs": true
   },
+
   //  어떤 파일을 컴파일할 지 설정 가능하다.
   "include": ["src"]
 }

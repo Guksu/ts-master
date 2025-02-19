@@ -30,9 +30,6 @@ const obj: IndexSignature = {
 const obj2: IndexSignature = {};
 
 // TS는 집합의 관점으로 보면 된다.
-// 리터럴타입으로 지정된 num2는 크케 number타입에 해당하므로 num1에 할당할 수 있다.
-// 하지만 그 반대는 불가하다.
-
 let num1: number = 10;
 let num2: 10 = 10;
 
@@ -96,3 +93,119 @@ function func(value: string | number | Date | null | Dog) {
     console.log(value.name);
   }
 }
+
+// 사용자 정의 타입가드
+// 라이브러리처럼 직접 타읍을 건드릴 수 없는 경우 사용한다.
+
+type Pig = {
+  name: string;
+  isPig: boolean;
+};
+
+type Cat = {
+  name: string;
+  isCat: boolean;
+};
+
+type Animal = Pig | Cat;
+
+function isPig(animal: Animal): animal is Pig {
+  return (animal as Pig).isPig;
+}
+
+// 제네릭은 다음과 같이도 활용 가능하다
+const returnFirst = <T>(value: [T, ...unknown[]]): T => {
+  return value[0];
+};
+
+const getLength = <T extends { length: number }>(value: T) => {
+  return value.length;
+};
+
+// map 직접 구현
+const map = <T, U>(arr: T[], callback: (val: T) => U) => {
+  let result = [];
+  for (let i = 0; i < arr.length; i++) {
+    result.push(callback(arr[i]));
+  }
+  return result;
+};
+
+const promise = new Promise<number>((resolve, reject) => {
+  setTimeout(() => {
+    resolve(30);
+  }, 3000);
+});
+
+// keyof
+// 객체의 모든 key를 유니온 타입으로 추측
+
+const jong: Human = {
+  age: 30,
+  name: "min",
+};
+
+// typeof를 사용해서 type을 추측 가능하다.
+type Min = typeof jong;
+
+// 맵드타입
+
+interface User2 {
+  name: string;
+  age: number;
+  id: number;
+}
+
+type PartialUser = {
+  // name?, age?, id?와 동일하다
+  // ?가 있으면 선택적 프로퍼티 없으면 User2와 동일
+
+  // [key in "name" | "age" | "id"]?: User2[key];
+  // 위 아래 코드는 동일
+  [key in keyof User2]?: User2[key];
+};
+
+// 템플릿 리터럴 타입
+type color = "red" | "green";
+type color2 = "black" | "white";
+type colors = `${color}-${color2}`;
+
+// 조건부 타입
+type A<T> = T extends string ? string : number;
+
+// 만약 함수 오버로딩이 없다면 내부 반환값에 as any를 붙여야 하는 문제가 있다.
+// 기본적으로 함수 내부에선 T는 unknown으로 추론한다.
+function isString<T>(value: T): T extends string ? string : undefined;
+function isString(value: any) {
+  if (typeof value === "string") {
+    return "isString";
+  } else {
+    return undefined;
+  }
+}
+
+// infer는 조건문에서 특정 타입만 가져온다
+type FuncA = () => string;
+type FuncB = () => number;
+type GetReturnType<T> = T extends () => infer R ? R : never;
+
+type GetA = GetReturnType<FuncA>;
+type GetB = GetReturnType<FuncB>;
+
+type GetPromiseReturnType<T> = T extends Promise<infer R> ? R : never;
+
+type PomiseA = GetPromiseReturnType<Promise<number>>;
+type PomiseB = GetPromiseReturnType<Promise<boolean>>;
+
+// Pick 타입 직접 구현
+type Pick<T, K extends keyof T> = {
+  [key in K]: T[key];
+};
+
+// Omit 타입 직접 구현
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+// Record 타입 직접 구현
+type Record<K extends keyof any, V> = {
+  [Key in K]: V;
+};
